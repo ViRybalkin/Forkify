@@ -455,5 +455,32 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}]},["5grJX"], null, "parcelRequire3a11")
+const container = document.querySelector('.recipe');
+console.log(container);
+const showRecipe = async ()=>{
+    try {
+        const res = await fetch('https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886');
+        const data = await res.json();
+        let { recipe  } = data.data;
+        recipe = {
+            id: recipe.id,
+            image: recipe.image_url,
+            ingredients: recipe.ingredients,
+            publisher: recipe.publisher,
+            servings: recipe.servings,
+            source_url: recipe.source_url,
+            title: recipe.title,
+            cooking_time: recipe.cooking_time
+        };
+        const markup = `\n           <figure class="recipe__fig">\n          <img src=${recipe.image} alt="Tomato" class="recipe__img" />\n          <h1 class="recipe__title">\n            <span>${recipe.title}</span>\n          </h1>\n        </figure>\n\n        <div class="recipe__details">\n          <div class="recipe__info">\n            <svg class="recipe__info-icon">\n              <use href="src/img/icons.svg#icon-clock"></use>\n            </svg>\n            <span class="recipe__info-data recipe__info-data--minutes">${recipe.cooking_time}</span>\n            <span class="recipe__info-text">minutes</span>\n          </div>\n          <div class="recipe__info">\n            <svg class="recipe__info-icon">\n              <use href="src/img/icons.svg#icon-users"></use>\n            </svg>\n            <span class="recipe__info-data recipe__info-data--people">${recipe.servings}</span>\n            <span class="recipe__info-text">servings</span>\n\n            <div class="recipe__info-buttons">\n              <button class="btn--tiny btn--increase-servings">\n                <svg>\n                  <use href="src/img/icons.svg#icon-minus-circle"></use>\n                </svg>\n              </button>\n              <button class="btn--tiny btn--increase-servings">\n                <svg>\n                  <use href="src/img/icons.svg#icon-plus-circle"></use>\n                </svg>\n              </button>\n            </div>\n          </div>\n\n          <div class="recipe__user-generated">\n            <svg>\n              <use href="src/img/icons.svg#icon-user"></use>\n            </svg>\n          </div>\n          <button class="btn--round">\n            <svg class="">\n              <use href="src/img/icons.svg#icon-bookmark-fill"></use>\n            </svg>\n          </button>\n        </div>\n\n        <div class="recipe__ingredients">\n          <h2 class="heading--2">Recipe ingredients</h2>\n          <ul class="recipe__ingredient-list">\n            <li class="recipe__ingredient">\n              <svg class="recipe__icon">\n                <use href="src/img/icons.svg#icon-check"></use>\n              </svg>\n              <div class="recipe__quantity">1000</div>\n              <div class="recipe__description">\n                <span class="recipe__unit">g</span>\n                pasta\n              </div>\n            </li>\n\n            <li class="recipe__ingredient">\n              <svg class="recipe__icon">\n                <use href="src/img/icons.svg#icon-check"></use>\n              </svg>\n              <div class="recipe__quantity">0.5</div>\n              <div class="recipe__description">\n                <span class="recipe__unit">cup</span>\n                ricotta cheese\n              </div>\n            </li>\n          </ul>\n        </div>\n\n        <div class="recipe__directions">\n          <h2 class="heading--2">How to cook it</h2>\n          <p class="recipe__directions-text">\n            This recipe was carefully designed and tested by\n            <span class="recipe__publisher">${recipe.publisher}</span>. Please check out\n            directions at their website.\n          </p>\n          <a\n            class="btn--small recipe__btn"\n            href="${recipe.source_url}"\n            target="_blank"\n          >\n            <span>Directions</span>\n            <svg class="search__icon">\n              <use href="src/img/icons.svg#icon-arrow-right"></use>\n            </svg>\n          </a>\n        </div>\n        `;
+        container.innerHTML = '';
+        container.insertAdjacentHTML('afterbegin', markup);
+        console.log(recipe);
+        if (!res.ok) throw new Error(`${data.message} (${res.status}) `);
+    } catch (err) {
+        console.log(err);
+    }
+};
+showRecipe();
 
 //# sourceMappingURL=index.58183b87.js.map
