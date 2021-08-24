@@ -4,12 +4,18 @@ import { Fraction } from 'fractional';
 class recipeView {
   #parentEl = document.querySelector('.recipe');
   #data;
+  #errorMessage = 'We could not find that recipe. Please try another one!';
+  #sucessMessage = 'all ok';
 
   render(data) {
     this.#data = data;
     this.#clear();
     const markup = this.#generateMarkup();
     this.#parentEl.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  addHandlerRender(handler) {
+    ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
   }
   #clear() {
     this.#parentEl.innerHTML = '';
@@ -25,9 +31,37 @@ class recipeView {
     this.#clear();
     this.#parentEl.insertAdjacentHTML('afterbegin', markup);
   }
+  renderError(message = this.#errorMessage) {
+    const markup = `
+      <div class="error">
+            <div>
+              <svg>
+                <use href="${icons}#icon-alert-triangle"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+          </div> 
+`;
+    this.#clear();
+    this.#parentEl.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  renderMessage(message = this.#sucessMessage) {
+    const markup = `
+    <div class="message">
+            <div>
+                <svg>
+                    <use href="${icons}#icon-smile"></use>
+                </svg>
+            </div>
+            <p>${sucessMessage}</p>
+        </div>
+`;
+    this.#clear();
+    this.#parentEl.insertAdjacentHTML('afterbegin', markup);
+  }
 
   #generateMarkup() {
-    console.log(this.#data);
     return ` <figure class="recipe__fig">
             <img src="${
               this.#data.image
