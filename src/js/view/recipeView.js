@@ -1,73 +1,54 @@
-import icons from 'url:../../img/icons.svg';
 import { Fraction } from 'fractional';
+import view from './view';
+import icons from 'url:../../img/icons.svg';
 
-class recipeView {
-  #parentEl = document.querySelector('.recipe');
-  #data;
-  #errorMessage = 'We could not find that recipe. Please try another one!';
-  #sucessMessage = 'all ok';
+class recipeView extends view {
+  _parentEl = document.querySelector('.recipe');
+  _errorMessage = 'We could not find that recipe. Please try another one!';
+  _sucessMessage = 'all ok';
 
+  _data;
   render(data) {
-    this.#data = data;
-    this.#clear();
-    const markup = this.#generateMarkup();
-    this.#parentEl.insertAdjacentHTML('afterbegin', markup);
+    this._data = data;
+    this._clear();
+    const markup = this._generateMarkup();
+    this._parentEl.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  _clear() {
+    this._parentEl.innerHTML = '';
+  }
+  renderSpinner() {
+    const markup = `
+           <div class="spinner">
+            <svg>
+              <use href="${icons}#icon-loader"></use>
+            </svg>
+          </div>
+  `;
+    this._clear();
+    this._parentEl.insertAdjacentHTML('afterbegin', markup);
   }
 
   addHandlerRender(handler) {
     ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
   }
-  #clear() {
-    this.#parentEl.innerHTML = '';
-  }
-  renderSpinner(parentEl) {
-    const markup = `
-         <div class="spinner">
-          <svg>
-            <use href="${icons}#icon-loader"></use>
-          </svg>
-        </div>
-`;
-    this.#clear();
-    this.#parentEl.insertAdjacentHTML('afterbegin', markup);
-  }
-  renderError(message = this.#errorMessage) {
-    const markup = `
-      <div class="error">
-            <div>
-              <svg>
-                <use href="${icons}#icon-alert-triangle"></use>
-              </svg>
-            </div>
-            <p>${message}</p>
-          </div> 
-`;
-    this.#clear();
-    this.#parentEl.insertAdjacentHTML('afterbegin', markup);
+  addHandlerUpdateServing(handler) {
+    this._parentEl.addEventListener('click', e => {
+      const btn = e.target.closest('.btn--update-servings');
+      if (!btn) return;
+      const updateTo = +btn.dataset.updateTo;
+      handler(updateTo);
+    });
   }
 
-  renderMessage(message = this.#sucessMessage) {
-    const markup = `
-    <div class="message">
-            <div>
-                <svg>
-                    <use href="${icons}#icon-smile"></use>
-                </svg>
-            </div>
-            <p>${sucessMessage}</p>
-        </div>
-`;
-    this.#clear();
-    this.#parentEl.insertAdjacentHTML('afterbegin', markup);
-  }
-
-  #generateMarkup() {
+  _generateMarkup() {
     return ` <figure class="recipe__fig">
             <img src="${
-              this.#data.image
+              this._data.image
             }" alt="Tomato" class="recipe__img" crossorigin/>
             <h1 class="recipe__title">
-                <span>${this.#data.title}</span>
+                <span>${this._data.title}</span>
             </h1>
         </figure>
 
@@ -77,7 +58,7 @@ class recipeView {
                     <use href="${icons}#icon-clock"></use>
                 </svg>
                 <span class="recipe__info-data recipe__info-data--minutes">${
-                  this.#data.cooking_time
+                  this._data.cooking_time
                 }</span>
                 <span class="recipe__info-text">minutes</span>
             </div>
@@ -86,17 +67,21 @@ class recipeView {
                     <use href="${icons}#icon-users"></use>
                 </svg>
                 <span class="recipe__info-data recipe__info-data--people">${
-                  this.#data.servings
+                  this._data.servings
                 }</span>
                 <span class="recipe__info-text">servings</span>
 
                 <div class="recipe__info-buttons">
-                    <button class="btn--tiny btn--increase-servings">
+                    <button class="btn--tiny btn--update-servings btn--increase-servings" data-update-to=${
+                      +this._data.servings - 1
+                    }>
                         <svg>
                             <use href="${icons}#icon-minus-circle"></use>
                         </svg>
                     </button>
-                    <button class="btn--tiny btn--increase-servings">
+                    <button class="btn--tiny btn--update-servings btn--increase-servings" data-update-to=${
+                      +this._data.servings + 1
+                    }>
                         <svg>
                             <use href="${icons}#icon-plus-circle"></use>
                         </svg>
@@ -119,8 +104,8 @@ class recipeView {
         <div class="recipe__ingredients">
             <h2 class="heading--2">Recipe ingredients</h2>
             <ul class="recipe__ingredient-list">
-                ${this.#data.ingredients
-                  .map(ing => this.#generateMarkupIngredinet(ing))
+                ${this._data.ingredients
+                  .map(ing => this._generateMarkupIngredinet(ing))
                   .join('')}
             </ul>
         </div>
@@ -130,13 +115,13 @@ class recipeView {
             <p class="recipe__directions-text">
                 This recipe was carefully designed and tested by
                 <span class="recipe__publisher">${
-                  this.#data.publisher
+                  this._data.publisher
                 }</span>. Please check out
                 directions at their website.
             </p>
             <a
                 class="btn--small recipe__btn"
-                href="${this.#data.source_url}"
+                href="${this._data.source_url}"
                 target="_blank"
             >
                 <span>Directions</span>
@@ -147,7 +132,7 @@ class recipeView {
         </div>
             `;
   }
-  #generateMarkupIngredinet(ing) {
+  _generateMarkupIngredinet(ing) {
     return `
             <li class="recipe__ingredient">
               <svg class="recipe__icon">
