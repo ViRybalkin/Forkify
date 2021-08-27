@@ -658,7 +658,6 @@ init();
 const clearBookmarks = ()=>{
     localStorage.clear('bookmarks');
 };
-clearBookmarks();
 const uploadRecipe = async (newRecipe)=>{
     try {
         const ingredients = Object.entries(newRecipe).filter((entry)=>entry[0].startsWith('ingredient') && entry[1] !== ''
