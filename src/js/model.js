@@ -1,5 +1,5 @@
 import * as config from './config';
-import { getJSON } from './helpers';
+import { AJAX } from './helpers';
 
 export const state = {
   recipe: {},
@@ -12,20 +12,25 @@ export const state = {
   bookmark: [],
 };
 
+const createRecipeObject = data => {
+  const { recipe } = data.data;
+  return {
+    id: recipe.id,
+    image: recipe.image_url,
+    ingredients: recipe.ingredients,
+    publisher: recipe.publisher,
+    servings: recipe.servings,
+    source_url: recipe.source_url,
+    title: recipe.title,
+    cooking_time: recipe.cooking_time,
+    ...(recipe.key && { key: recipe.key }),
+  };
+};
+
 export const loadRecipe = async id => {
   try {
-    const data = await getJSON(`${config.BASE_URL}/${id}?key=${config.KEY}`);
-    const { recipe } = data.data;
-    state.recipe = {
-      id: recipe.id,
-      image: recipe.image_url,
-      ingredients: recipe.ingredients,
-      publisher: recipe.publisher,
-      servings: recipe.servings,
-      source_url: recipe.source_url,
-      title: recipe.title,
-      cooking_time: recipe.cooking_time,
-    };
+    const data = await AJAX(`${config.BASE_URL}/${id}?key=${config.KEY}`);
+    state.recipe = createRecipeObject(data);
 
     if (state.bookmark.some(bookmark => bookmark.id === id))
       state.recipe.bookmarked = true;
@@ -37,7 +42,7 @@ export const loadRecipe = async id => {
 export const loadSearch = async query => {
   try {
     state.search.query = query;
-    const data = await getJSON(
+    const data = await AJAX(
       `${config.BASE_URL}/?search=${query}?key=${config.KEY}`
     );
     const { recipes } = data.data;
@@ -47,6 +52,7 @@ export const loadSearch = async query => {
         image: recipe.image_url,
         publisher: recipe.publisher,
         title: recipe.title,
+        ...(recipe.key && { key: recipe.key }),
       };
     });
     state.search.page = 1;
@@ -98,3 +104,35 @@ const clearBookmarks = () => {
   localStorage.clear('bookmarks');
 };
 clearBookmarks();
+
+export const uploadRecipe = async newRecipe => {
+  try {
+    const ingredients = Object.entries(newRecipe)
+      .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
+      .map(ing => {
+        const ingArr = ing[1].replaceAll(' ', '').split(',');
+        if (ingArr.length !== 3)
+          throw new Error(
+            'Wrong ingredients format! Please use the correct format :)'
+          );
+        const [quantity, unit, description] = ingArr;
+        return { quantity: quantity ? +quantity : null, unit, description };
+      });
+
+    const recipe = {
+      title: newRecipe.title,
+      source_url: newRecipe.sourceUrl,
+      image_url: newRecipe.image,
+      publisher: newRecipe.publisher,
+      cooking_time: +newRecipe.cookingTime,
+      servings: +newRecipe.servings,
+      ingredients,
+    };
+
+    const data = await AJAX(`${config.BASE_URL}?key=${config.KEY}`, recipe);
+    state.recipe = createRecipeObject(data);
+    addBookmark(state.recipe);
+  } catch (error) {
+    throw error;
+  }
+};
