@@ -25,7 +25,6 @@ export const loadRecipe = async id => {
       title: recipe.title,
       cooking_time: recipe.cooking_time,
     };
-    console.log(recipe);
   } catch (e) {
     throw e;
   }

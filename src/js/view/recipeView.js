@@ -38,7 +38,9 @@ class recipeView extends view {
       const btn = e.target.closest('.btn--update-servings');
       if (!btn) return;
       const updateTo = +btn.dataset.updateTo;
-      handler(updateTo);
+      if (+updateTo > 0) {
+        handler(+updateTo);
+      }
     });
   }
 

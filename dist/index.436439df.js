@@ -474,6 +474,7 @@ const controlRecipe = async ()=>{
         if (!id) return;
         _recipeViewDefault.default.renderSpinner();
         await _model.loadRecipe(id);
+        _resultViewDefault.default.render(_model.getSearchResultPage(1));
         _recipeViewDefault.default.render(_model.state.recipe);
     } catch (err) {
         _recipeViewDefault.default.renderError();
@@ -486,8 +487,7 @@ const controlSearch = async ()=>{
         const query = _searchViewDefault.default.getQuery();
         if (!query) return;
         await _model.loadSearch(query);
-        // resultView.render(model.state.search.result);
-        _resultViewDefault.default.render(_model.getSearchResultPage(1));
+        _resultViewDefault.default.render(_model.getSearchResultPage());
         _paginationViewDefault.default.render(_model.state.search);
     } catch (e) {
         console.log(e);
@@ -548,7 +548,6 @@ const loadRecipe = async (id)=>{
             title: recipe.title,
             cooking_time: recipe.cooking_time
         };
-        console.log(recipe);
     } catch (e) {
         throw e;
     }
@@ -698,7 +697,7 @@ class recipeView extends _viewDefault.default {
             const btn = e.target.closest('.btn--update-servings');
             if (!btn) return;
             const updateTo = +btn.dataset.updateTo;
-            handler(updateTo);
+            if (+updateTo > 0) handler(+updateTo);
         });
     }
     _generateMarkup() {
@@ -972,11 +971,24 @@ var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class View {
     _data;
     render(data) {
-        if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
         this._data = data;
         this._clear();
         const markup = this._generateMarkup();
         this._parentEl.insertAdjacentHTML('afterbegin', markup);
+    }
+    update(data) {
+        if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
+        this._data = data;
+        const newMarkup = this._generateMarkup();
+        const newDom = document.createRange().createContextualFragment(newMarkup);
+        const newElements = Array.from(newDom.querySelectorAll('*'));
+        const curElements = Array.from(this._parentEl.querySelectorAll('*'));
+        newElements.forEach((newEl, i)=>{
+            const curEl = curElements[i];
+            if (!newEl.isEqualNode(curEl) && newEl.firstChild.nodeValue.trim() != '') curEl.textContent = newEl.textContent;
+            if (!newEl.isEqualNode(curEl)) Array.from(newEl.attributes).forEach((attr)=>curEl.setAttribute(attr.name, attr.value)
+            );
+        });
     }
     _clear() {
         this._parentEl.innerHTML = '';
@@ -1076,7 +1088,8 @@ class resultView extends _viewDefault.default {
         ).join('');
     }
     _generateMarkupPreview(result) {
-        return `\n    <li class="preview">\n      <a class="preview__link" href="#${result.id}">\n        <figure class="preview__fig">\n          <img src="${result.image}" alt="Test" crossorigin />\n        </figure>\n        <div class="preview__data">\n          <h4 class="preview__title">${result.title}</h4>\n          <p class="preview__publisher">${result.publisher}</p>\n          <div class="preview__user-generated">\n            <svg>\n              <use href="${_iconsSvgDefault.default}#icon-user"></use>\n            </svg>\n          </div>\n        </div>\n      </a>\n    </li>\n`;
+        const id = window.location.hash.slice(1);
+        return `\n    <li class="preview">\n      <a class="preview__link ${result.id === id ? 'preview__link--active' : ''}" href="#${result.id}">\n        <figure class="preview__fig">\n          <img src="${result.image}" alt="Test" crossorigin />\n        </figure>\n        <div class="preview__data">\n          <h4 class="preview__title">${result.title}</h4>\n          <p class="preview__publisher">${result.publisher}</p>\n          <div class="preview__user-generated">\n            <svg>\n              <use href="${_iconsSvgDefault.default}#icon-user"></use>\n            </svg>\n          </div>\n        </div>\n      </a>\n    </li>\n`;
     }
 }
 exports.default = new resultView();
