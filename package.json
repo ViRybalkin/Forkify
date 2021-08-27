@@ -4,7 +4,7 @@
   "description": "App for find recipe",
   "scripts": {
     "start": "parcel index.html",
-    "build": "parcel build index.html --dist-dir dist --public-url ./"
+    "build": "parcel build index.html"
   },
   "author": "Vitaliy Rybalkin",
   "license": "ISC",
@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "core-js": "^3.16.2",
-    "fractional": "^1.0.0",
     "regenerator-runtime": "^0.13.9"
   }
 }
